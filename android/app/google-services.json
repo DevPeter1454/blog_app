@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "8864383414",
+    "project_id": "litcon-blog",
+    "storage_bucket": "litcon-blog.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:8864383414:android:1d96b6e1cb380f28168117",
+        "android_client_info": {
+          "package_name": "com.example.litcon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "8864383414-umulo85mt7ut2n1bd348t4nmom1p8k9h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.litcon",
+            "certificate_hash": "ec8bf5808bdbda3a7d1a9b88894245a558a9e01d"
+          }
+        },
+        {
+          "client_id": "8864383414-7td19sj8tuogja6udimo4sljlddagfb3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtnMvNxh1rBo6sEuD0UATzcmkcquSfvfY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "8864383414-7td19sj8tuogja6udimo4sljlddagfb3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "8864383414-rs2s6af2sek17qksmo02tbogl5s50mh5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.litcon"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
