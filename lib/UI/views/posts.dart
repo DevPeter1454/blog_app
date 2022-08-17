@@ -1,11 +1,11 @@
-import 'package:litcon/Model/model.dart';
-import 'package:litcon/UI/widgets/loading.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:litcon/Model/model.dart' as user;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:litcon/Model/model.dart';
+// import 'package:litcon/Model/model.dart';
 
 class View extends StatefulWidget {
   const View({Key? key}) : super(key: key);
@@ -18,8 +18,10 @@ class _ViewState extends State<View> {
   // FirebaseFirestore _firestore = FirebaseFirestore.instance;
   dynamic post;
   dynamic postReceived;
+  dynamic user;
+  dynamic writer;
   ScrollController controller = ScrollController();
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   var height;
   var width;
   bool liked = false;
@@ -30,25 +32,69 @@ class _ViewState extends State<View> {
             FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid]),
         // 'liked': false,
       });
-      // setState(() {
-      //   liked = !liked;
-      // });
-      // liked = false;
     } else {
       await _firestore.collection('posts').doc(id).update({
         'likes':
             FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid]),
       });
-      // setState(() {
-      //   liked = !liked;
-      // });
-      // liked = true;
     }
+  }
+
+  followWriter() async {
+    if (postReceived.uid != FirebaseAuth.instance.currentUser!.uid) {
+      if (writer['followers']
+          .contains(FirebaseAuth.instance.currentUser!.uid)) {
+        await _firestore.collection('users').doc(writer['uid']).update({
+          'followers':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid]),
+        });
+      }else {
+        await _firestore.collection('users').doc(postReceived.uid).update({
+          'followers':
+              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid]),
+        });
+      }
+
+     
+    }
+  }
+  followUser()async{
+     if (user['following'].contains(writer['uid'])) {
+        await _firestore.collection('users').doc(user['uid']).update({
+          'following':
+              FieldValue.arrayRemove([writer['uid']]),
+        });
+      }else{
+        await _firestore.collection('users').doc(user['uid']).update({
+          'following':
+              FieldValue.arrayUnion([writer['uid']]),
+        });
+      }
+  }
+
+  readData() {
+    _firestore.collection('users').get().then((value) {
+      value.docs.forEach((element) {
+        if (element.reference.id == FirebaseAuth.instance.currentUser!.uid) {
+          setState(() {
+            user = element.data();
+          });
+          print(user);
+          // print(postReceived.uid);
+        }
+        if (element.reference.id == postReceived.uid) {
+          setState(() {
+            writer = element.data();
+          });
+          print(writer);
+        }
+      });
+    });
   }
 
   getPost() async {
     await _firestore.collection('posts').get().then((value) {
-      value.docs.forEach((element) {
+      for (var element in value.docs) {
         if (element.reference.id == post) {
           setState(() {
             postReceived = Post.fromMap(element.data());
@@ -56,9 +102,8 @@ class _ViewState extends State<View> {
                 .contains(FirebaseAuth.instance.currentUser!.uid);
             // liked = postReceived.liked;
           });
-          print(postReceived.postUrl);
         }
-      });
+      }
     });
   }
 
@@ -67,6 +112,7 @@ class _ViewState extends State<View> {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
       getPost();
+      readData();
     });
   }
 
@@ -81,7 +127,7 @@ class _ViewState extends State<View> {
         // appBar: AppBar(),
         body: SafeArea(
       // minimum: const EdgeInsets.all(8.0),
-      child: postReceived == null
+      child: postReceived == null || user == null || writer == null
           ? Container(
               alignment: Alignment.center,
               child: const Center(
@@ -96,12 +142,11 @@ class _ViewState extends State<View> {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Container(
                   height: 350,
-                  child: Stack(fit: StackFit.loose, children: [
-                    Container(
-                        child: Image.network(postReceived.postUrl,
-                            // fit: BoxFit.fitWidth,
-                            width: double.infinity,
-                            height: 300)),
+                  child: Stack(children: [
+                    Image.network(postReceived.postUrl,
+                        // fit: BoxFit.fitWidth,
+                        width: double.infinity,
+                        height: 300),
                     Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: IconButton(
@@ -129,34 +174,49 @@ class _ViewState extends State<View> {
                             '${DateFormat.yMMMd().format(postReceived.date)}'),
                       ),
                     ),
-                   Row(
-                    children: [
-                       Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: IconButton(
-                          onPressed: () async {
-                            await likeBlog(
-                                postReceived.postId, postReceived.likes);
-                            getPost();
-                            Future.delayed(const Duration(milliseconds: 500),
-                                () {
+                    Row(children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: IconButton(
+                            onPressed: () async {
+                              await likeBlog(
+                                  postReceived.postId, postReceived.likes);
+                              getPost();
                               setState(() {
-                                liked = postReceived.liked;
+                                // liked = !liked;
                               });
-                            });
+                            },
+                            icon: postReceived.likes.contains(
+                                    FirebaseAuth.instance.currentUser!.uid)
+                                ? const Icon(Icons.favorite, color: Colors.red)
+                                : const Icon(Icons.favorite_border,
+                                    color: Colors.amber)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('${postReceived.likes.length} likes'),
+                      ),
+                       postReceived.uid == FirebaseAuth.instance.currentUser!.uid ?
+                          const SizedBox.shrink():
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            await followWriter();
+                            await followUser();
+                            readData();
+                            setState(() {});
+
+                            // getPost();
                           },
-                          icon: postReceived.likes
-                .contains(FirebaseAuth.instance.currentUser!.uid)
-                              ? const Icon(Icons.favorite, color: Colors.red)
-                              : const Icon(Icons.favorite_border,
-                                  color: Colors.amber)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('${postReceived.likes.length} likes'),
-                    ),
-                    ]
-                   )
+                          child:
+                           writer['followers'].contains(
+                                  FirebaseAuth.instance.currentUser!.uid)
+                              ? const Text('Following')
+                              : const Text('Follow'),
+                        ),
+                      ),
+                    ])
                   ],
                 )),
                 Text(postReceived.text,

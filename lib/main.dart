@@ -1,8 +1,9 @@
 import 'package:litcon/UI/Authenticate/signin.dart';
 import 'package:litcon/UI/Authenticate/signup.dart';
-import 'package:litcon/UI/Dashboard/dashboard.dart';
+import 'package:litcon/UI/views/tabs/dashboard.dart';
 import 'package:litcon/UI/views/myposts.dart';
 import 'package:litcon/UI/views/posts.dart';
+import 'package:litcon/UI/views/tabs/home.dart';
 import 'package:litcon/UI/views/tags.dart';
 import 'package:litcon/UI/widgets/loading.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
           } else if (snapshot.hasData) {
             dynamic name = snapshot.data;
             print(name);
-            return DashBoard(uid: name.uid);
+            return HomePage(uid: name.uid);
           }
           return const SignUp();
         },

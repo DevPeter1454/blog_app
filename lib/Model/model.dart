@@ -129,7 +129,7 @@ class Post {
       profileImg: map['profileImg'] ?? '',
       likes: List.from(map['likes']),
       type: List.from(map['type']),
-      ref: map['ref'] ?? null,
+      ref: map['ref'],
       liked: map['liked'] ?? false,
     );
   }

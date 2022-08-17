@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:litcon/Model/model.dart';
+import 'package:litcon/UI/widgets/loading.dart';
 
 class Tags extends StatefulWidget {
   const Tags({Key? key}) : super(key: key);
@@ -37,9 +38,12 @@ class _TagsState extends State<Tags> {
   @override
   Widget build(BuildContext context) {
     tag = ModalRoute.of(context)!.settings.arguments;
-    return Scaffold(
+    return posts.isEmpty ? Loading() : Scaffold(
       appBar: AppBar(
         title: Text(tag.toString().toUpperCase()),
+        elevation: 0,
+        backgroundColor: Colors.grey[200],
+          iconTheme: IconThemeData(color: Colors.amber[600]), 
       ),
         body: posts.isEmpty
             ? Center(
